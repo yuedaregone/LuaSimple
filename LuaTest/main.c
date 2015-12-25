@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
 	//luaL_requiref(L, , lib->func, 1);
     //lua_pop(L, 1); 
     //lua_register(L, "MyLib", MyLib);
+    luaL_newlib(L, MyLib);
+    lua_setglobal(L, "MyLib");
     
     
 	

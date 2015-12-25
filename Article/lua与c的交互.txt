@@ -1,0 +1,48 @@
+	Lua和c交互都是通过栈来实现，关于lua的栈，不在赘述，这不是本文重点。(其实只是大致知道，并不精通。)
+	要在程序中使用lua，首先得创建一个栈。如：lua_State* L = luaL_newstate();这里的lua_State就是一个栈的指针，所有的与c交互的操作都是通过这个L来实现的。程序中最好只用一个lua_State。接下来要打开一些lua库，比如base库、table库、io库、string库、math库、coroutine库、debug库等等，可调用luaL_openlibs(L);就行了，这个函数会帮你打开这些库。其实打开库就是把c函数注册到lua里，使得我们可以在lua里调用。接下来就可以运行lua文件了。看下面的代码：
+	
+#include <stdio.h>
+#include <stdlib.h>
+#include <lua/lua.h>
+#include <lua/lualib.h>
+#include <lua/lauxlib.h>
+
+int main(int argc, char *argv[]) {
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
+	
+	if (luaL_loadfile(L, "./main.lua") || lua_pcall(L, 0, 0, 0))
+	{
+		printf("LUA ERROR:%s", lua_tostring(L, -1));
+		lua_close(L);
+		return -1;
+	}	
+	return 0;
+}
+	然后再main.lua里写lua代码就行了。
+	
+	1.lua调用c函数
+	在lua中要想调用c代码的函数，需要先在c代码里注册一下这个函数，怎样注册呢？我们先来看下lua自己是怎么处理的。先看个简单的math库，在lmathlib.c文件里。该文件里前面都是一些定义的静态函数：math_abs，math_sin，blabla...先不管这些函数，在文件的下面，找到一个luaL_Reg型的数组，在lauxlib.h里，我们能找到luaL_Reg的原型：
+typedef struct luaL_Reg {
+	const char *name;
+	lua_CFunction func;
+} luaL_Reg;
+	从名字我们就能猜到，这个结构体存的就是名字和函数。这个name字段就是在lua里调的c的函数名字，func字段就是对应的c函数。在lua.h中，我们可以找到lua_CFunction的原型：
+typedef int (*lua_CFunction) (lua_State *L);
+	它就是型如:	int function_name(lua_State *L)的函数。然后再回来看lmathlib.c文件。在luaL_Reg数组上面的那些函数都是符合lua_CFunction原型的。实际上注册到lua里的函数都是必须写成lua_CFunction型的。参数lua_State *L就是用luaL_newstate创建创建出来的那个L。用来传递lua中的一些参数信息。返回值是int型，代表有几个返回值(lua中可以有多个返回值)。
+	lua中调用c函数的时候，先把要传递的参数按顺序压栈，所以我们在c函数中处理的时候要把参数一个一个取出来。比如用math库中很多函数都用luaL_checknumber(lua_State *L, int narg)函数。表示check函数第narg个参数是不是number型的，如果是就返回这个值。类似的函数还有luaL_checkinteger、luaL_checklstring、luaL_checkunsigned等。把这些值取出来进行一些操作之后在把结果压栈。压栈用lua_pushnumber、lua_pushinteger、lua_pushunsigned、lua_pushlstring、lua_pushstring、lua_pushvfstring、lua_pushfstring、lua_pushcclosure、lua_pushboolean、lua_pushlightuserdata、lua_pushthread等，比如，我们要在lua里注册一个两数相加的函数，需要这样写这个函数：
+static int my_add(lua_State* L)
+{
+	int a = luaL_checknumber(L, 1);
+	int b = luaL_checknumber(L, 2);
+	lua_pushnumber(L, a+b);
+	return 1;
+}
+	然后在原来写的main函数的luaL_openlibs(L);函数下面注册一下这个函数，在lua里就可以直接调用了。
+lua_register(L, "my_add", my_add);
+	即
+lua_pushcfunction(L, my_add);
+lua_setglobal(L, "my_add");
+
+	
+	

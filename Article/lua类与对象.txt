@@ -1,0 +1,83 @@
+在lua中使用类与对象
+
+	lua中是可以进行面向对象编程的，可通过元表和元方法来实现。
+	按照我个人的理解，对一个表定义了元表之后，可修改这个表的一些特定行为。比如，对一个表定义了元表，而在元表里实现了__add的元方法，就可以对这个表进行加法操作。当两个表相加的时候，lua会检测两个表是否定义了元表，如果定义了就会找元表的__add方法是否为空，如果不为空就调用该方法。这种修改表的行为的操作很像c++中的运算符重载。
+	在lua中，可以用setmetatable(table, metatable)方法设置元表，tmeta = getmetatable (tab)返回table的元表。举一个简单的例子，实现两个表相加：
+	
+	local t1 = {a = 2}
+	local t2 = {a = 3}
+	
+	mt = {}
+	mt.__add = function(tb1, tb2)
+		local temp_t = {}
+		temp_t.a = tb1.a + tb2.a
+		return temp_t
+	end
+	setmetatable(t1, mt)
+	
+	local t3 = t1 + t2
+	print(t3.a) --输入结果为5
+	类似的元方法还有很多，如：
+	算术元方法：__add  __mul  __ sub  __div  __unm  __mod  __pow  (__concat)
+	关系元方法：__eq __lt(<) __le(<=)，其他Lua自动转换 a~=b --> not(a == b) a > b --> b < a a >= b --> b <= a 【注意NaN的情况】
+	
+	今天的重点是__index元方法。当查询表中一个不存在的字段时，会先查询有没有设置元表，如果没有设就返回nil，如果设置了元表，就查询元表中__index是否为空，不为空则返回__index。__index既可以返回一个表，也可以返回一个函数。
+	有了这个元方法，我们就可以用它来实现类与对象。
+	local mt = {a = 10, b = 20} --我们定义自己的元表，里面可以有一些变量或者方法，让各个对象可以访问
+	function mt:print_ab()
+		print(self.a, self.b)
+	end
+	mt.__index = mt --定义元表mt的元方法__index
+	
+	local o_tb_1 = {c = 30} --创建对象
+	setmetatable(o_tb_1, mt) --设置元表，其实就是访问o_tb_1的a和b时，映射到mt的a和b
+	o_tb_1:print_ab()
+	o_tb_1.a = 100
+	o_tb_1:print_ab()
+	
+	local o_tb_2 = {c = 30} --创建另一个对象
+	setmetatable(o_tb_2, mt) --设置元表，其实就是访问o_tb_1的a和b时，映射到mt的a和b
+	o_tb_2:print_ab()
+	o_tb_2.a = 200
+	o_tb_2:print_ab()
+	其实质就是元表mt的内容保持不变，共享给o_tb_1和o_tb_2，o_tb_1和o_tb_2通过__index映射到mt，访问mt的内容。
+	
+	我们可以进一步封装一下：
+	local LuaClass = {m_a = 10, m_b = 20} --定义类
+	function LuaClass:New(o) --定义类创建对象的方法
+		o = o or {}
+		setmetatable(o, self) --此处self指的是LuaClass
+		self.__index = self
+		return o
+	end
+	
+	function LuaClass:print_ab()
+		print(self.m_a, self.m_b)
+	end
+	--调用
+	local o_tb_1 = LuaClass:New()
+	o_tb_1:print_ab()
+	o_tb_1.m_a = 100
+	o_tb_1:print_ab()
+	
+	local o_tb_2 = LuaClass:New()
+	o_tb_2:print_ab()
+	o_tb_2.m_a = 200
+	o_tb_2:print_ab()
+	
+	如果要实现继承的话可以这样：
+	local ChildClass = LuaClass:New({m_c = 30}) --创建子类
+	function ChildClass:print_ab()
+		print(self.m_a, self.m_b, self.m_c)
+	end
+	
+	local o_tb_1 = ChildClass:New()
+	o_tb_1:print_ab()
+	o_tb_1.m_a = 100
+	o_tb_1:print_ab()
+	
+	local o_tb_2 = ChildClass:New()
+	o_tb_2:print_ab()
+	o_tb_2.m_a = 200
+	o_tb_2:print_ab() 
+	看上去类和对象的概念混为一谈，但是也没有办法，lua毕竟不是真正的面向对象。

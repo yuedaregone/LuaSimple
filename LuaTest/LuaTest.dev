@@ -4,8 +4,8 @@ Name=LuaTest
 Type=1
 Ver=2
 ObjFiles=
-Includes=D:\MyStudy\GitHub\LuaSimple\LuaTest\include
-Libs=D:\MyStudy\GitHub\LuaSimple\LuaTest\lib
+Includes=.\include
+Libs=.\lib
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
@@ -28,7 +28,7 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000000000000000
+CompilerSettings=1000000000000000000000000
 UnitCount=1
 
 [VersionInfo]

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 #include <lua/lua.h>
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
@@ -35,15 +36,17 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	
-	lua_getglobal(L, "my_lua_fun");
-	lua_pcall(L, 0, 0, 0);
+	lua_getglobal(L, "get_delay");	
+	lua_pcall(L, 0, 1, 0);
+	int delay = lua_tonumber(L, -1);
 	
-	
-	lua_getglobal(L, "my_lua_add");
-	lua_pushnumber(L, 10);
-	lua_pushnumber(L, 20);
-	lua_pcall(L, 2, 1, 0);
-	int param = lua_tonumber(L, -1);
-	printf("the result is %d", param);
+	int loop = 1;
+	while(loop == 1)
+	{		
+		lua_getglobal(L, "main_loop");	
+		lua_pcall(L, 0, 1, 0);
+		loop = lua_toboolean(L, -1);		
+		Sleep(delay);		
+	}	
 	return 0;
 }

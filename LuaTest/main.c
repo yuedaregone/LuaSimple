@@ -19,9 +19,12 @@ static const luaL_Reg MyLib[] = {
 };
 
 static void luaopen_mylib(lua_State* L)
-{
+{	
+	luaL_register(L, "MyLib", MyLib);
+	/* 5.2
 	luaL_newlib(L, MyLib);
     lua_setglobal(L, "MyLib");
+	*/
 }
 
 int main(int argc, char *argv[]) {

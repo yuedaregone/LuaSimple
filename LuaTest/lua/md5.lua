@@ -7,3 +7,9 @@ function md5.md5_code(str)
         end))
 end
 return md5
+
+--[[
+sample:
+md5 = require "md5"
+print(md5.md5_code("12134"))
+]]

@@ -4,11 +4,11 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = main.o
-LINKOBJ  = main.o
-LIBS     = -L"D:/Program Files (x86)/Dev/MinGW32/lib" -L"D:/Program Files (x86)/Dev/MinGW32/mingw32/lib" -static-libstdc++ -static-libgcc -L"./lib" lib/lua5.1.dll lib/lua51.dll
-INCS     = -I"D:/Program Files (x86)/Dev/MinGW32/include" -I"D:/Program Files (x86)/Dev/MinGW32/mingw32/include" -I"D:/Program Files (x86)/Dev/MinGW32/lib/gcc/mingw32/4.8.1/include" -I"./include"
-CXXINCS  = -I"D:/Program Files (x86)/Dev/MinGW32/include" -I"D:/Program Files (x86)/Dev/MinGW32/mingw32/include" -I"D:/Program Files (x86)/Dev/MinGW32/lib/gcc/mingw32/4.8.1/include" -I"D:/Program Files (x86)/Dev/MinGW32/lib/gcc/mingw32/4.8.1/include/c++" -I"./include"
+OBJ      = main.o support/luacurl.o support/lualibmgr.o
+LINKOBJ  = main.o support/luacurl.o support/lualibmgr.o
+LIBS     = -L"D:/Program Files (x86)/Dev-Cpp/MinGW32/lib" -L"D:/Program Files (x86)/Dev-Cpp/MinGW32/mingw32/lib" -static-libstdc++ -static-libgcc -L"./lib" lib/lua5.1.dll lib/lua51.dll lib/libcurl_imp.lib
+INCS     = -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include" -I"./include" -I"./support"
+CXXINCS  = -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include/c++" -I"./include" -I"./support"
 BIN      = LuaTest.exe
 CXXFLAGS = $(CXXINCS) -ansi
 CFLAGS   = $(INCS) -ansi
@@ -26,3 +26,9 @@ $(BIN): $(OBJ)
 
 main.o: main.c
 	$(CC) -c main.c -o main.o $(CFLAGS)
+
+support/luacurl.o: support/luacurl.c
+	$(CC) -c support/luacurl.c -o support/luacurl.o $(CFLAGS)
+
+support/lualibmgr.o: support/lualibmgr.c
+	$(CC) -c support/lualibmgr.c -o support/lualibmgr.o $(CFLAGS)

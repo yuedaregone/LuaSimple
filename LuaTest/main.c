@@ -13,6 +13,8 @@ static int my_add(lua_State* L)
 	return 1;
 }
 
+
+
 static const luaL_Reg MyLib[] = {
 	{"my_add", my_add},
 	{NULL, NULL}
@@ -31,6 +33,7 @@ int main(int argc, char *argv[]) {
 	lua_State* L = luaL_newstate();		
 	luaL_openlibs(L);
     luaopen_mylib(L);
+    luaopen_lualibmgr(L);
     
 	if (luaL_loadfile(L, "./main.lua") || lua_pcall(L, 0, 0, 0))
 	{

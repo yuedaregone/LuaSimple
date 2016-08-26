@@ -1,0 +1,132 @@
+# Kepler launching model
+# Define which launcher to build. If you need to install more than one launcher
+# install one at a time.
+# Valid options: cgi, fastcgi, mod2, xavante
+CGILUA_LAUNCHER= xavante
+
+# Optional Kepler packages (separated by space)
+# Valid options: lualogging luasql luaexpat luazip
+OPTIONAL_PACKAGES= lualogging md5
+
+# OS dependent settings (change those for Linux, OSX or FreeBSD)
+
+# Linux and FreeBSD options
+FPIC= -fPIC 
+LIB_OPTION= -shared
+LUASOCKET_DEFS=-DLUASOCKET_DEBUG
+LUASOCKET_LD=gcc
+
+# MacOS X options
+#FPIC=
+#LIB_OPTION= -bundle -undefined dynamic_lookup -all_load
+#LUASOCKET_DEFS=-DLUASOCKET_DEBUG -DUNIX_HAS_SUN_LEN
+#LUASOCKET_LD=export MACOSX_DEPLOYMENT_TARGET="10.3"; gcc
+
+# On FreeBSD systems, the following line should be commented
+DLLIB= -ldl
+
+#Lua library name (Lua Binaries naming by default)
+LUA_LIBS= -llua50 -lm
+
+# Installation directories
+
+# System's libraries directory (where binary libraries are installed)
+SYS_LIBDIR= /usr/local/lib
+
+# System's executables directory (where binary or script executables are installed)
+SYS_BINDIR= /usr/local/bin
+
+# Lua directory (where Lua source libraries will be installed)
+# This is used by LUA_PATH
+LUA_DIR= /usr/local/share/lua/5.0
+
+# Lua binary libraries directory (where Lua binary libraries will be installed)
+# This is used by LUA_CPATH
+LUA_LIBDIR= /usr/local/lib/lua/5.0
+
+# Lua includes directory
+LUA_INC= /usr/local/include/lua/5.0
+
+# Apache module directory
+APACHE2_MODDIR= /usr/lib/apache2/modules
+# Apache includes directories
+APACHE2_INC= /usr/include/apache2
+APACHE2_APR_INC= /usr/include/apr-0
+
+# CGI directory (where cgi launcher will be installed)
+CGI_DIR= /usr/local/bin
+
+# FastCGI directory (where fastcgi launcher will be installed)
+FCGI_DIR= /usr/local/bin
+
+# Kepler directories
+KEPLER_ROOT= /usr/local/kepler/1.0
+KEPLER_INIT= /usr/local/kepler/kepler_init.lua
+KEPLER_BIN=  $(KEPLER_ROOT)/lib
+KEPLER_LUA=  $(KEPLER_ROOT)/lua
+KEPLER_CONF= $(KEPLER_ROOT)/conf
+
+# Xavante directories
+XAVANTE_HOME= $(KEPLER_ROOT)
+XAVANTE_LUA = $(XAVANTE_HOME)/lua
+XAVANTE_CONF = $(XAVANTE_HOME)/conf
+XAVANTE_WEB = $(XAVANTE_HOME)/web
+
+#CGILua directories
+CGILUA_DIR=        $(LUA_DIR)/cgilua
+CGILUA_TMPDIR=     $(CGILUA_DIR)/tmp
+
+# Lua standalone interpreter (used by Xavante)
+LUA_INTERPRETER= $(SYS_BINDIR)/lua50
+
+# Lua Compiler
+LUAC= $(SYS_BINDIR)/luac50
+# Lua Binary converter (bin2c)
+# Lua distribution includes it at etc directory
+BIN2C= $(SYS_BINDIR)/bin2c50
+# Lua 5.1 package compatibility (relative to Kepler's root directory)
+COMPAT_DIR= compat/src
+
+# Compilation directives
+# pre-compile and include .lua file of launchers into .c file.
+CGILUA_DEFS= -DINCLUDE_LUA
+# mod_lua policy on Lua state creation
+#MOD_DEFS= -DLUA_STATE_PER_PROCESS
+MOD_DEFS= -DLUA_STATE_PER_REQUEST
+# compiler option: linking library for FastCGI
+FCGI_LIB= -lfcgi
+
+# LuaSQL driver Configuration
+#LUASQL_DRIVER= mysql
+
+### MySQL
+#LUASQL_LIBS= -L/usr/lib -lmysqlclient -lz
+#LUASQL_INCS= -I/usr/include/mysql
+
+### Oracle OCI8
+#LUASQL_LIBS= -L/home/oracle/OraHome1/lib -lz -lclntsh
+#LUASQL_INCS= -I/home/oracle/OraHome1/rdbms/demo -I/home/oracle/OraHome1/rdbms/public
+
+### PostgreSQL
+#LUASQL_LIBS= -L/usr/local/pgsql/lib -lpq
+#LUASQL_INCS= -I/usr/local/pgsql/include
+
+### SQLite
+#LUASQL_LIBS= -lsqlite
+
+### ODBC
+#LUASQL_LIBS= -L/usr/local/lib -lodbc
+#LUASQL_INCS= -DUNIXODBC -I/usr/local/include
+
+#########################################################
+# General parameters for the compiler and linker
+
+WARN= -O2 -pedantic -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings
+KINCS= -I$(LUA_INC) -I$(COMPAT_DIR) $(LUASQL_INCS)
+CFLAGS= $(WARN) $(FPIC) $(KINCS) $(LUASOCKET_DEFS) $(CGILUA_DEFS) -fno-common
+CC= gcc
+CL_LIBS= $(LUA_LIBS) $(DLLIB)
+LIBS= $(CL_LIBS)
+LIBNAME= $T.so.$V
+
+# $Id: config,v 1.42 2006/11/24 18:05:03 mascarenhas Exp $

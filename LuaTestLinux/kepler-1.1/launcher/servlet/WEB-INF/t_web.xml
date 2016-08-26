@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+  "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<web-app>
+  <!-- CGILua Launcher Servlet configuration -->
+  <servlet>
+    <servlet-name>cgilua</servlet-name>
+    <servlet-class>org.keplerproject.cgilua.servlet.CGILuaServlet</servlet-class>
+    
+    <!-- Full path of CGILua servlet lua launcher -->
+    <init-param>
+      <param-name>cgilua.launcherpath</param-name>
+      <param-value>CGILUA_DIR/servlet.lua</param-value>
+    </init-param>
+    
+    <!-- CGILua installation dir -->
+    <init-param>
+      <param-name>cgilua.basedir</param-name>
+      <param-value>CGILUA_DIR</param-value>
+    </init-param>
+
+	<!-- Location of scripts (optional). Default is application root. -->
+    <init-param>
+      <param-name>cgilua.scriptdir</param-name>
+      <param-value>WEB-INF/cgilua</param-value>
+    </init-param>
+    
+    <!-- Number of LuaState's created for the pool to handle requests. -->
+    <init-param>
+      <param-name>cgilua.poolsize</param-name>
+      <param-value>30</param-value>
+    </init-param>
+    <!--		<init-param>
+			<param-name>log4j-init-file</param-name>
+			<param-value>WEB-INF/log4j.lcf</param-value>
+		</init-param>-->
+  </servlet>
+
+  <!-- CGILua files extension mappings -->
+  <servlet-mapping>
+    <servlet-name>cgilua</servlet-name>
+    <url-pattern>*.lua</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>cgilua</servlet-name>
+    <url-pattern>*.lp</url-pattern>
+  </servlet-mapping>
+  
+<!--  <servlet-mapping>
+    <servlet-name>cgilua</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>-->
+</web-app>

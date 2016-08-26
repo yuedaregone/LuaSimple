@@ -1,0 +1,12 @@
+<dtml-var manage_page_header>
+
+<form action="lua_edit" method="post">
+ID: <input type='text' name="id" value="&dtml-getId;"/><br>
+Title: <input type='text' name="title" value="&dtml-getTitle;"/><br>
+Document Root: <input type='text' name="docroot" value="&dtml-getDocroot;"/><br>
+              
+<input type="submit"/>
+
+</form>
+
+<dtml-var manage_page_footer>

@@ -1,0 +1,62 @@
+# $Id: Makefile.win,v 1.4 2007/05/18 19:52:52 carregal Exp $
+
+LUA_BINDIR=c:\lua5.1
+LUA_INC=c:\lua5.1\include
+LUA_DIR=c:\lua5.1\lua
+LUA_LIBDIR=c:\lua5.1\lib
+LUA_LIB=c:\lua5.1\lua5.1.lib
+LUAC=c:\lua5.1\luac5.1.exe
+LUA=c:\lua5.1\lua5.1.exe
+BIN2C=c:\lua5.1\bin2c5.1.exe
+KEPLER_INIT=c:\kepler\kepler_init.lua
+FCGI_LIB=
+FCGI_INCLUDE=
+
+T= fastcgi
+
+SRCS= $T.c lfcgi.c lfcgi.h 
+OBJS= $T.obj
+LFCGI_OBJS= lfcgi.obj
+LFCGI_LIB= lfcgi.dll
+FT= t_$T.lua
+FL= $T.lua
+FC= $T.lc
+FH= $T.lch
+T_CONF= t_$T.conf
+CONF= $T.conf
+SAPI_DIR= $(LUA_DIR)\sapi\fastcgi
+
+.c.obj:
+	cl /c /Fo$@ /O2 /I$(LUA_INC) /I$(FCGI_INCLUDE) /DINCLUDE_LUA $<
+
+$T.exe: $(FH) $(OBJS)
+	link /out:$@ $(OBJS) $(LUA_LIB)
+
+build: $T $(LFCGI_LIB)
+
+$(LFCGI_LIB): $(LFCGI_OBJS)
+	link /dll /def:lfcgi.def /out:$@ $(LFCGI_OBJS) $(FCGI_LIB) $(LUA_LIB)
+
+$(FL): $(FT)
+        $(LUA) -e"s=io.read('*all')" \
+	       -e"s=string.gsub(s,'%[%[KEPLER_INIT%]%]',[=[[[$(KEPLER_INIT)]]]=])" \
+	       -e"print(s)" < $(FT) > $(FL)
+
+$(FC): $(FL)
+	$(LUAC) -o $@ $(FL)
+
+$(FH): $(FC)
+	$(BIN2C) $(FC) | \
+	$(LUA) -e"s=io.read('*all')" \
+	       -e"s=string.gsub(s,'lua_pcall','status=lua_pcall')" \
+	       -e"print(s)" > $@
+
+install: $T.exe $(FL)
+	IF NOT EXIST $(LUA_LIBDIR) mkdir $(LUA_LIBDIR)
+	copy $(LFCGI_LIB) $(LUA_LIBDIR)
+	IF NOT EXIST $(SAPI_DIR) mkdir $(SAPI_DIR)
+	copy sapi\*.lua $(SAPI_DIR)
+	copy $T.exe $(LUA_BINDIR)
+
+clean:
+	rm -f $T $(FL) $(FC) $(FH) $(OBJS) $(LFCGI_OBJS) $(CONF) $(LFCGI_LIB)

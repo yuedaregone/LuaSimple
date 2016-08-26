@@ -1,0 +1,6 @@
+LIBRARY	"cgilua_isapi"
+
+EXPORTS
+	HttpExtensionProc	@1
+	GetExtensionVersion	@2
+	

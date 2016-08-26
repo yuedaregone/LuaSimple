@@ -1,0 +1,26 @@
+# $Id: Makefile.win,v 1.7 2007/05/09 00:02:38 carregal Exp $
+
+T= md5
+V= 1.0.2
+
+include config.win
+
+OBJS= src\md5.obj src\md5lib.obj 
+LUAS= src\md5.lua
+
+
+.c.obj:
+	$(CC) /c /Fo$@ $(CFLAGS) $<
+
+src\$(LIBNAME) : $(OBJS)
+	link /dll /def:src\$(T).def /out:src\$(LIBNAME) $(OBJS) $(LUA_LIB)
+
+install: src\$(LIBNAME)
+	IF NOT EXIST $(LUA_LIBDIR)/md5 mkdir $(LUA_LIBDIR)\md5
+	copy src\$(LIBNAME) $(LUA_LIBDIR)\md5\core.dll
+	IF NOT EXIST $(LUA_DIR) mkdir $(LUA_DIR)
+	copy $(LUAS) $(LUA_DIR)
+
+clean:
+	FOR %i in ($(OBJS)) DO del %i
+	del src\$(LIBNAME) src\core.lib src\core.exp

@@ -1,0 +1,60 @@
+# Microsoft Developer Studio Generated NMAKE File, Based on XavanteTray.dsp
+
+LUA_INC=c:\lua5.1\include
+LUA_LIB=c:\lua5.1\bin\lua5.1.lib
+
+ALL : "xavante.exe"
+
+CLEAN :
+	-@erase "vc80.idb"
+	-@erase "SystemTraySDK.obj"
+	-@erase "XavanteTray.obj"
+	-@erase "XavanteTray.res"
+	-@erase "xavante.exe"
+
+CPP=cl.exe
+
+CPP_PROJ=/nologo /D "_CRT_SECURE_NO_DEPRECATE" /W3 /O2 /I $(LUA_INC) /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D XAVANTE_START=\"xavante_start.lch\" /FD /EHsc /c 
+
+.c.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+RSC=rc.exe
+RSC_PROJ=/l 0xc09 /fo"XavanteTray.res" /d "NDEBUG" 
+
+LINK32=link.exe
+LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib shell32.lib $(LUA_LIB) /nologo /subsystem:windows /incremental:no /out:"xavante.exe" 
+LINK32_OBJS= \
+	"SystemTraySDK.obj" \
+	"XavanteTray.obj" \
+	"XavanteTray.res"
+
+"xavante.exe" : $(LINK32_OBJS)
+    $(LINK32) @<<
+  $(LINK32_FLAGS) $(LINK32_OBJS)
+<<
+
+SOURCE=SystemTraySDK.cpp
+
+"SystemTraySDK.obj" : $(SOURCE)
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=XavanteTray.cpp
+
+"XavanteTray.obj" : $(SOURCE)
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=XavanteTray.rc
+
+"XavanteTray.res" : $(SOURCE)
+	$(RSC) /l 0xc09 /fo"XavanteTray.res" /d "NDEBUG" $(SOURCE)
+
+
+

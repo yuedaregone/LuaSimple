@@ -1,0 +1,30 @@
+# $Id: config,v 1.13 2006/12/15 18:03:52 mascarenhas Exp $
+
+# System's libraries directory (where binary libraries are installed)
+LUA_LIBDIR= /usr/local/lib/lua/5.1
+
+# System's lua directory (where Lua libraries are installed)
+LUA_DIR= /usr/local/share/lua/5.1
+
+# System's executables directory (where binary or script executables are installed)
+SYS_BINDIR= /usr/local/bin
+
+# Complete path to Lua command line interpreter
+LUA_INTERPRETER= /usr/local/bin/lua
+
+# Xavante default directory for HTTP documents
+XAVANTE_HOME= /usr/local/xavante
+
+# Kepler initialization file
+KEPLER_INIT= /usr/local/xavante/xavante_init.lua
+
+XAVANTE_LUA = $(XAVANTE_HOME)/lua
+XAVANTE_CONF = $(XAVANTE_HOME)/conf
+XAVANTE_WEB = $(XAVANTE_HOME)/web
+
+VERSION= 1.2
+PKG = xavante-$(VERSION)
+DIST_DIR= $(PKG)
+TAR_FILE= $(PKG).tar.gz
+ZIP_FILE= $(PKG).zip
+

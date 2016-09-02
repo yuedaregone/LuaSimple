@@ -1,6 +1,6 @@
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
-
+#include <stdio.h>
 typedef struct
 {
 	unsigned char* data;

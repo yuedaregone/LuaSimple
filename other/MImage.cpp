@@ -1,6 +1,7 @@
 #include "MImage.h"
-#include "png.h"
+#include "../lpng1624/png.h"
 #include <stdlib.h>
+#include <string.h>
 
 #define CC_RGB_PREMULTIPLY_ALPHA(vr, vg, vb, va) \
 	(unsigned)(((unsigned)((unsigned char)(vr)* ((unsigned char)(va)+1)) >> 8) | \

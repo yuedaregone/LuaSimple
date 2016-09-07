@@ -1,5 +1,5 @@
 #include "MImage.h"
-#include "../lpng1624/png.h"
+#include "png.h"
 #include <stdlib.h>
 #include <string.h>
 

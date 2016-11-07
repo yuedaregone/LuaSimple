@@ -2,16 +2,23 @@
 --print(math.abs(-10))
 print(MyLib.my_add(1, 100))
 
-function get_delay()
-	return 1/60*1000;
+function say_hello(param)
+	print("HelloWorld!")
+	print(param)
 end
 
-local isReturn = true
-function main_loop()	
-	print("lua loop")
-	return isReturn;
+function get_delay()	
+	return 1;
 end
---isReturn = false
+
+function main_loop()
+	local utility = require "lualib/utility"
+	print(utility.get_date())
+	print(utility.get_time())
+	MyLib.my_test_callback(say_hello)
+	return 0
+end
+
 
 
 

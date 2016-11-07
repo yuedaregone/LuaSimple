@@ -7,8 +7,13 @@ function say_hello(param)
 	print(param)
 end
 
-function get_delay()	
+function get_delay()
 	return 1;
+end
+
+function init_program()
+	print("init")
+	print(Http.fetchHtml("http://www.baidu.com"))
 end
 
 function main_loop()
@@ -19,6 +24,6 @@ function main_loop()
 	return 0
 end
 
-
-
-
+function close_program()
+	print("close")
+end

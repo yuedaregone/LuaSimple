@@ -120,4 +120,24 @@ lua_pushnumber(L, 20);
 lua_pcall(L, 2, 1, 0);
 int param = lua_tonumber(L, -1);
 printf("the result is %d", param);
+	
+	3.在lua中调用c函数，注册回调函数
+	
+	lua调用c的异步函数的时候，需要注册回调函数。lua的函数可以作为一个变量来传递，在c中，lua的函数作为一个int型来存放。首先在c中创建一个lua中调用的函数：
+static int my_test_callback(lua_State* L)
+{
+	int handle = luaL_ref(L, LUA_REGISTRYINDEX); //获取lua中传递的lua函数
+	//做异步操作，可以把handle用其他变量存放，然后异步结束后执行下面代码，进行回调
+	lua_rawgeti(L, LUA_REGISTRYINDEX, handle); 
+	lua_pushstring(L, "Hello"); //回调函数的参数
+	lua_pcall(L, 1, 0, 0); //调用回调函数
+	return 0;
+}	
+	同样放在MyLib中。	
+	在lua中写个测试函数：
+function say_hello(param)
+	print("HelloWorld!")
+	print(param)
+end
+MyLib.my_test_callback(say_hello)
 

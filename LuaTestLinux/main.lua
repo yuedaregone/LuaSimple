@@ -13,7 +13,9 @@ end
 
 function init_program()
 	print("init")
-	print(Http.fetchHtml("http://www.baidu.com"))
+	--local url = "https://cn.bing.com/az/hprichbg/rb/NottulnHerbst_ZH-CN9638949027_1920x1080.jpg"
+	--print(Http.fetchHtml("https://cn.bing.com"))
+	--Http.download(url, "D://1234.jpg")
 end
 
 function main_loop()

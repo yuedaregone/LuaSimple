@@ -1,1 +1,0 @@
-lualibmgr.open_curl();

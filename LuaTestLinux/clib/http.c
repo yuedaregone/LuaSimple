@@ -15,6 +15,8 @@ void download(const char* url, const char* file)
 		return;
 	}
 	CURL* pCurl = curl_easy_init();
+    curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYHOST, 1);
 	curl_easy_setopt(pCurl, CURLOPT_URL, url);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, handle);
@@ -34,6 +36,8 @@ struct string* getHtml(const char* url)
 {
     struct string* str = new_buff_str();
 	CURL* pCurl = curl_easy_init();
+    curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYHOST, 1);
 	curl_easy_setopt(pCurl, CURLOPT_URL, url);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, html_callback);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, str);
@@ -51,8 +55,17 @@ static int fetchHtml(lua_State* L)
 	return 1;
 }
 
+static int downloadFile(lua_State* L)
+{
+    const char *url = luaL_checkstring(L, 1);
+    const char *file = luaL_checkstring(L, 2);
+    download(url, file);
+    return 0;
+}
+
 static const luaL_Reg Http[] = {
 	{"fetchHtml", fetchHtml},
+    {"download", downloadFile},
 	{NULL, NULL}
 };
 

@@ -17,6 +17,7 @@ void download(const char* url, const char* file)
 	CURL* pCurl = curl_easy_init();
     curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYPEER, 0);
 	curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYHOST, 1);
+    curl_easy_setopt(pCurl, CURLOPT_TIMEOUT, 120);
 	curl_easy_setopt(pCurl, CURLOPT_URL, url);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, handle);
@@ -38,6 +39,7 @@ struct string* getHtml(const char* url)
 	CURL* pCurl = curl_easy_init();
     curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYPEER, 0);
 	curl_easy_setopt(pCurl, CURLOPT_SSL_VERIFYHOST, 1);
+    curl_easy_setopt(pCurl, CURLOPT_TIMEOUT, 120);
 	curl_easy_setopt(pCurl, CURLOPT_URL, url);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEFUNCTION, html_callback);
 	curl_easy_setopt(pCurl, CURLOPT_WRITEDATA, str);

@@ -1,3 +1,6 @@
+#ifndef __STR_H__
+#define __STR_H__
+
 #include <stdio.h>
 
 struct string
@@ -13,3 +16,5 @@ void append_str(struct string* str, const char* ap);
 void append_buff(struct string* str, void* buff, int len);
 
 void free_buff_str(struct string* str);
+
+#endif

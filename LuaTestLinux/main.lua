@@ -5,7 +5,7 @@ end
 
 function init_program()
 	--print("init")
-	--require "luasrc/reptile"
+	require "luasrc/reptile"
 end
 
 function main_loop()

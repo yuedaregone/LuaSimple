@@ -25,7 +25,6 @@ function reptile:deal_with_one_page(url)
         self:deal_with_one_page(self:get_cur_url())
         return
     end
-    print("fetch over")
 
     local atlas = {}
     string.gsub(html, self.tag_title, function(s)
@@ -57,6 +56,10 @@ function reptile:deal_with_one_atlas(url)
         self:downloadFromUrl(s)
         return s
     end)
+    string.gsub(html, "<img title=.-delay=\"([^\n<]-)\" />", function(s)
+        self:downloadFromUrl(s)
+        return s
+    end)
 end
 
 function reptile:downloadFromUrl(url)
@@ -66,10 +69,7 @@ function reptile:downloadFromUrl(url)
         file_name = s..".jpg"
         return s
     end)
-    local u = string.gsub(url, "lrg", function(s)
-        return "mid"
-    end)
-    Http.download(u, self.dest..file_name)
+    Http.download(url, self.dest..file_name)
 end
 
 reptile:init()

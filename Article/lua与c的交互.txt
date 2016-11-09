@@ -1,7 +1,7 @@
-	Lua��c��������ͨ��ջ��ʵ�֣�����lua��ջ������׸�����ⲻ�Ǳ����ص㡣(��ʵֻ�Ǵ���֪����������ͨ��)
-	Ҫ�ڳ�����ʹ��lua�����ȵô���һ��ջ���磺lua_State* L = luaL_newstate();�����lua_State����һ��ջ��ָ�룬���е���c�����Ĳ�������ͨ�����L��ʵ�ֵġ����������ֻ��һ��lua_State��
-	������Ҫ��һЩlua�⣬����base�⡢table�⡢io�⡢string�⡢math�⡢coroutine�⡢debug��ȵȣ��ɵ���luaL_openlibs(L);�����ˣ����������������Щ�⡣��ʵ�򿪿���ǰ�c����ע�ᵽlua�ʹ�����ǿ�����lua����á��������Ϳ�������lua�ļ��ˡ�������Ĵ��룺
-	
+	Lua和c交互都是通过栈来实现，关于lua的栈，不在赘述，这不是本文重点。(其实只是大致知道，并不精通。)
+	要在程序中使用lua，首先得创建一个栈。如：lua_State* L = luaL_newstate();这里的lua_State就是一个栈的指针，所有的与c交互的操作都是通过这个L来实现的。程序中最好只用一个lua_State。
+	接下来要打开一些lua库，比如base库、table库、io库、string库、math库、coroutine库、debug库等等，可调用luaL_openlibs(L);就行了，这个函数会帮你打开这些库。其实打开库就是把c函数注册到lua里，使得我们可以在lua里调用。接下来就可以运行lua文件了。看下面的代码：
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <lua/lua.h>
@@ -11,55 +11,55 @@
 int main(int argc, char *argv[]) {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
-	
+
 	if (luaL_loadfile(L, "./main.lua") || lua_pcall(L, 0, 0, 0))
 	{
 		printf("LUA ERROR:%s", lua_tostring(L, -1));
 		lua_close(L);
 		return -1;
-	}	
+	}
 	return 0;
 }
-	Ȼ����main.lua��дlua��������ˡ�
-	
-	1.lua����c����
-	��lua��Ҫ�����c����ĺ�������Ҫ����c������ע��һ���������������ע���أ�������������lua�Լ�����ô�����ġ��ȿ����򵥵�math�⣬��lmathlib.c�ļ�����ļ���ǰ�涼��һЩ����ľ�̬������math_abs��math_sin��blabla...�Ȳ�����Щ���������ļ������棬�ҵ�һ��luaL_Reg�͵����飬��lauxlib.h��������ҵ�luaL_Reg��ԭ�ͣ�
+	然后再main.lua里写lua代码就行了。
+
+	1.lua调用c函数
+	在lua中要想调用c代码的函数，需要先在c代码里注册一下这个函数，怎样注册呢？我们先来看下lua自己是怎么处理的。先看个简单的math库，在lmathlib.c文件里。该文件里前面都是一些定义的静态函数：math_abs，math_sin，blabla...先不管这些函数，在文件的下面，找到一个luaL_Reg型的数组，在lauxlib.h里，我们能找到luaL_Reg的原型：
 typedef struct luaL_Reg {
 	const char *name;
 	lua_CFunction func;
 } luaL_Reg;
-	���������Ǿ��ܲµ�������ṹ���ľ������ֺͺ��������name�ֶξ�����lua�����c�ĺ������֣�func�ֶξ��Ƕ�Ӧ��c��������lua.h�У����ǿ����ҵ�lua_CFunction��ԭ�ͣ�
+	从名字我们就能猜到，这个结构体存的就是名字和函数。这个name字段就是在lua里调的c的函数名字，func字段就是对应的c函数。在lua.h中，我们可以找到lua_CFunction的原型：
 typedef int (*lua_CFunction) (lua_State *L);
-	����������:	int function_name(lua_State *L)�ĺ�����Ȼ���ٻ�����lmathlib.c�ļ�����luaL_Reg�����������Щ�������Ƿ���lua_CFunctionԭ�͵ġ�ʵ����ע�ᵽlua��ĺ������Ǳ���д��lua_CFunction�͵ġ�����lua_State *L������luaL_newstate���������������Ǹ�L������ͨ��ջ����lua�е�һЩ������Ϣ������ֵ��int�ͣ������м�������ֵ(lua�п����ж������ֵ)��
-	lua�е���c������ʱ���Ȱ�Ҫ���ݵĲ�����˳��ѹջ������������c�����д�����ʱ��Ҫ�Ѳ���һ��һ��ȡ������������math���кܶຯ������luaL_checknumber(lua_State *L, int narg)��������ʾcheck������narg�������ǲ���number�͵ģ�����Ǿͷ������ֵ�����Ƶĺ�������luaL_checkinteger��luaL_checklstring��luaL_checkunsigned�ȡ�����Щֵȡ��������һЩ����֮���ڰѽ��ѹջ��ѹջ��lua_pushnumber��lua_pushinteger��lua_pushunsigned��lua_pushlstring��lua_pushstring��lua_pushvfstring��lua_pushfstring��lua_pushcclosure��lua_pushboolean��lua_pushlightuserdata��lua_pushthread�ȣ����磬����Ҫ��lua��ע��һ��������ӵĺ�������Ҫ����д���������
+	它就是型如:	int function_name(lua_State *L)的函数。然后再回来看lmathlib.c文件。在luaL_Reg数组上面的那些函数都是符合lua_CFunction原型的。实际上注册到lua里的函数都是必须写成lua_CFunction型的。参数lua_State *L就是用luaL_newstate创建创建出来的那个L。用来通过栈传递lua中的一些参数信息。返回值是int型，代表有几个返回值(lua中可以有多个返回值)。
+	lua中调用c函数的时候，先把要传递的参数按顺序压栈，所以我们在c函数中处理的时候要把参数一个一个取出来。比如用math库中很多函数都用luaL_checknumber(lua_State *L, int narg)函数。表示check函数第narg个参数是不是number型的，如果是就返回这个值。类似的函数还有luaL_checkinteger、luaL_checklstring、luaL_checkunsigned等。把这些值取出来进行一些操作之后在把结果压栈。压栈用lua_pushnumber、lua_pushinteger、lua_pushunsigned、lua_pushlstring、lua_pushstring、lua_pushvfstring、lua_pushfstring、lua_pushcclosure、lua_pushboolean、lua_pushlightuserdata、lua_pushthread等，比如，我们要在lua里注册一个两数相加的函数，需要这样写这个函数：
 static int my_add(lua_State* L)
 {
-	int a = luaL_checknumber(L, 1);//ȡ��һ������
-	int b = luaL_checknumber(L, 2);//ȡ��һ������
-	lua_pushnumber(L, a+b);//���ѹջ
+	int a = luaL_checknumber(L, 1);//取第一个参数
+	int b = luaL_checknumber(L, 2);//取第一个参数
+	lua_pushnumber(L, a+b);//结果压栈
 	return 1;
 }
-	Ȼ����ԭ��д��main������luaL_openlibs(L);��������ע��һ�������������lua��Ϳ���ֱ�ӵ����ˡ�
+	然后在原来写的main函数的luaL_openlibs(L);函数下面注册一下这个函数，在lua里就可以直接调用了。
 lua_register(L, "my_add", my_add);
-	��
+	即
 lua_pushcfunction(L, my_add);
 lua_setglobal(L, "my_add");
-	��lua�
+	在lua里：
 print(my_add(1, 2))
 
-	����ע��Ļ���ÿ��ע��һ��ȫ�ֺ�����������ģ����ô���أ���ʵ��lua�Դ���һЩ�⣬�����Ѿ�֪�����ˡ���������Ǽ򵥽�����һ�ַ�����
-	���ȴ���һ��luaL_Reg�Ľṹ�����飬��c��������lua��ĺ�������һһ��Ӧ���������������磺
+	这样注册的话，每次注册一个全局函数。如果想分模块怎么办呢？其实看lua自带的一些库，我们已经知道答案了。在这里，我们简单介绍另一种方法。
+	首先创建一个luaL_Reg的结构体数组，把c函数和在lua里的函数名字一一对应起来存放在数组里。如：
 static const luaL_Reg MyLib[] = {
 	{"my_add", my_add},
 	{NULL, NULL}
 };
-	Ȼ��Ѹղŵ�ע�ắ�����ָ�Ϊ��
-luaL_newlib(L, MyLib);  //����һ��MyLib��
+	然后把刚才的注册函数部分改为：
+luaL_newlib(L, MyLib);  //创建一个MyLib表
 lua_setglobal(L, "MyLib");
-	����lua_setglobal��������˼�ǰ�ջ����Ԫ�ص�����Ȼ�������Ϊ��Ϊ��MyLib����ȫ�ֱ�������ջ����Ԫ�ؾ���luaL_newlib������MyLib����������lua�������������
+	这里lua_setglobal函数的意思是把栈顶的元素弹出，然后把它设为名为“MyLib”的全局表。这里栈顶的元素就是luaL_newlib创建的MyLib表。我们在lua里可以这样调用
 print(MyLib.my_add(1, 100))
 
-	����c���룬���£�
+	整理c代码，如下：
 #include <stdio.h>
 #include <stdlib.h>
 #include <lua/lua.h>
@@ -86,58 +86,82 @@ static void luaopen_mylib(lua_State* L)
 }
 
 int main(int argc, char *argv[]) {
-	lua_State* L = luaL_newstate();		
+	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
     luaopen_mylib(L);
-    
+
 	if (luaL_loadfile(L, "./main.lua") || lua_pcall(L, 0, 0, 0))
 	{
 		printf("LUA ERROR:%s", lua_tostring(L, -1));
 		lua_close(L);
 		return -1;
-	}	
+	}
 	return 0;
 }
-	
-	2.��c�����lua����
-	c�����lua���������˵�ͼ򵥶��ˡ������õ�lua�������ڵ��ļ����뱻���ع������Ҹú�������Ϊlocal���������������ǵ�main.lua�Ѿ���ִ����loadfile�����������main.lua�еĺ������Ա�c������õ���������main.lua��д���򵥵ĺ�����
+
+	2.在c里调用lua函数
+	c代码调lua函数相对来说就简单多了。所调用的lua函数所在的文件必须被加载过，而且该函数不能为local。比如上文中我们的main.lua已经被执行了loadfile操作，因此在main.lua中的函数可以被c代码调用到。比如早main.lua中写个简单的函数：
 function my_lua_fun()
 	print("this is a lua function!");
 end
-	����main.c�п���д��
-lua_getglobal(L, "my_lua_fun");//��������Ϊ�ҵ��������
-lua_pcall(L, 0, 0, 0);//���ú���
-	������������һ�ȡ����ֵ����������:
-	lua������
-function my_lua_add(param1, param2)	
+	则在main.c中可以写：
+lua_getglobal(L, "my_lua_fun");//可以理解为找到这个函数
+lua_pcall(L, 0, 0, 0);//调用函数
+	如果传参数并且获取返回值，可以这样:
+	lua函數：
+function my_lua_add(param1, param2)
 	print("param1:"..param1, "param2:"..param2);
 	return param1+param2;
 end
-	c�{�ã�
+	c調用：
 lua_getglobal(L, "my_lua_add");
 lua_pushnumber(L, 10);
 lua_pushnumber(L, 20);
 lua_pcall(L, 2, 1, 0);
 int param = lua_tonumber(L, -1);
 printf("the result is %d", param);
-	
-	3.��lua�е���c������ע��ص�����
-	
-	lua����c���첽������ʱ����Ҫע��ص�������lua�ĺ���������Ϊһ�����������ݣ���c�У�lua�ĺ�����Ϊһ��int������š�������c�д���һ��lua�е��õĺ�����
+
+	3.在lua中调用c函数，注册回调函数
+
+	lua调用c的异步函数的时候，需要注册回调函数。lua的函数可以作为一个变量来传递，在c中，lua的函数作为一个int型来存放。首先在c中创建一个lua中调用的函数：
 static int my_test_callback(lua_State* L)
 {
-	int handle = luaL_ref(L, LUA_REGISTRYINDEX); //��ȡlua�д��ݵ�lua����
-	//���첽���������԰�handle������������ţ�Ȼ���첽������ִ��������룬���лص�
-	lua_rawgeti(L, LUA_REGISTRYINDEX, handle); 
-	lua_pushstring(L, "Hello"); //�ص������Ĳ���
-	lua_pcall(L, 1, 0, 0); //���ûص�����
+	int handle = luaL_ref(L, LUA_REGISTRYINDEX); //获取lua中传递的lua函数
+	//做异步操作，可以把handle用其他变量存放，然后异步结束后执行下面代码，进行回调
+	lua_rawgeti(L, LUA_REGISTRYINDEX, handle);
+	lua_pushstring(L, "Hello"); //回调函数的参数
+	lua_pcall(L, 1, 0, 0); //调用回调函数
 	return 0;
-}	
-	ͬ������MyLib�С�	
-	��lua��д�����Ժ�����
+}
+	同样放在MyLib中。
+	在lua中写个测试函数：
 function say_hello(param)
 	print("HelloWorld!")
 	print(param)
 end
 MyLib.my_test_callback(say_hello)
 
+	4.在lua中调用c函数，传递一个表，作为参数
+
+	lua调用c函数，有时候要把一组数据作为参数，传递到c中。lua中可以用表来存放数据，但在c函数中接收时比较麻烦，不能用仅用luaL_check*函数来取得参数。下面是一个lua中传递表参数的例子：
+
+static int setData(lua_State* L)
+{
+    luaL_checktype(L, 1, LUA_TTABLE); //检查Lua调用代码中传递的第一个参数必须是table。否则将引发错误。
+    lua_pushnil(L); //第一个key
+    while (lua_next(L, 1) != 0) { //取一对键值对
+        if (lua_type(L, -1) == LUA_TSTRING) //值
+        {
+			printf(lua_tostring(L, -1))
+        }
+		if (lua_type(L, -2) == LUA_TSTRING) //键
+        {
+			printf(lua_tostring(L, -2))
+        }
+        lua_pop(L, 1); //弹出
+    }
+    return 0;
+}
+
+	在lua中测试：
+setData({"abc", "def"})

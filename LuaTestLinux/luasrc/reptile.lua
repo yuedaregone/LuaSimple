@@ -3,13 +3,23 @@ local reptile = {
     dest = "D:/img/",
     cur_page = 1,
     tag_title = "<h2><a href=\"(.-)\">.-</a></h2>",
+    url_headers = {
+        "Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5",
+        "Accept-Encoding: gzip, deflate",
+        "Accept-Language: zh-CN",
+        "Connection: Keep-Alive",
+        "DNT: 1",
+        "Host: girlatlas.b0.upaiyun.com",
+        "Referer: http://girl-atlas.com",
+        "User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)",
+    }
 }
 
 
 function reptile:init()
+    Http.initHttp()
     self.cur_page = 1
     self:deal_with_one_page(self.url)
-    --self:downloadFromUrl("http://girlatlas.b0.upaiyun.com/2554/20160520/01084jde49sq88ivg670.jpg!lrg")
 end
 
 function reptile:get_cur_url()
@@ -18,6 +28,7 @@ end
 
 function reptile:deal_with_one_page(url)
     print("page:"..self.cur_page)
+    Http.resetHeader()
     local html = Http.fetchHtml(url)
     if html == nil then
         print(string.format("error: can't fetch url (%s).", url))
@@ -42,6 +53,7 @@ function reptile:deal_with_one_page(url)
 end
 
 function reptile:deal_with_one_atlas(url)
+    Http.resetHeader()
     local html = Http.fetchHtml(url)
     if html == nil then return end
 
@@ -69,7 +81,12 @@ function reptile:downloadFromUrl(url)
         file_name = s..".jpg"
         return s
     end)
+    Http.setHeader(self.url_headers)
     Http.download(url, self.dest..file_name)
+end
+
+function reptile:destroy()
+    Http.destroyHttp()
 end
 
 reptile:init()
